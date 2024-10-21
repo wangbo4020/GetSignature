@@ -7,20 +7,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,6 +60,9 @@ class MainActivity : ComponentActivity() {
     )
 
     private val mSigningValues = mutableStateListOf<AppSigningValue>()
+    private var mPnContent by mutableStateOf(TextFieldValue(""))
+    private val mPnFocuser = FocusRequester()
+    private val mPnError = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,10 +80,8 @@ class MainActivity : ComponentActivity() {
     @Preview
     @Composable
     fun MainActivityView() {
-        var pnContent by remember { mutableStateOf(TextFieldValue("")) }
-        val pnFocuser = remember { FocusRequester() }
-        val verSnackbar = remember { SnackbarHostState() }
         val coroutineScope = rememberCoroutineScope()
+        val verSnackbar = remember { SnackbarHostState() }
         Scaffold(
             snackbarHost = { SnackbarHost(verSnackbar) },
             topBar = {
@@ -117,7 +116,8 @@ class MainActivity : ComponentActivity() {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(all = 16.dp),
+                        .padding(all = 16.dp)
+                    ,
                     verticalAlignment = Alignment.CenterVertically
 
                 ) {
@@ -125,11 +125,24 @@ class MainActivity : ComponentActivity() {
                     OutlinedTextField(
                         modifier = Modifier
                             .weight(1f)
-                            .focusRequester(pnFocuser),
-                        value = pnContent,
-                        onValueChange = { pnContent = it },
+                            .focusRequester(mPnFocuser),
+                        value = mPnContent,
+                        onValueChange = {
+                            mPnContent = it
+                            mPnError.value = false
+                                        },
                         label = { Text("Package Name") },
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                onClickPaste()
+                            }) {
+                                Icon(Icons.Outlined.ContentPaste, contentDescription = "Paste")
+                            }
+                        },
+                        isError = mPnError.value,
+                        singleLine = true,
                     )
+                    /*
                     Spacer(modifier = Modifier.width(6.dp))
                     Button(
                         shape = MaterialTheme.shapes.small,
@@ -141,15 +154,12 @@ class MainActivity : ComponentActivity() {
                         ),
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 16.dp),
                         onClick = {
-                            val text = getClipboardText()?.toString() ?: ""
-                            if (text.isEmpty()) return@Button
-                            pnFocuser.requestFocus()
-                            pnContent =
-                                pnContent.copy(text = text, selection = TextRange(text.length))
+                            onClickPaste()
                         }
                     ) {
                         Text("Paste")
                     }
+*/
                 }
 
                 // Button to get signature
@@ -157,20 +167,18 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    onClick = { onClickGetSignature(pnContent.text) },
+                    onClick = { onClickGetSignature(mPnContent.text) },
                 ) {
                     Text("Get Signature")
                 }
 
-                SelectionContainer {
-                    LazyColumn(
-//                        modifier = Modifier
-//                            .fillMaxSize()
-//                            .verticalScroll(rememberScrollState()),
-                    ) {
-                        items(mSigningValues.size) {
-                            SigningInfoItem(mSigningValues[it])
-                        }
+                LazyColumn(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .verticalScroll(rememberScrollState()),
+                ) {
+                    items(mSigningValues.size) {
+                        SigningInfoItem(mSigningValues[it])
                     }
                 }
             }
@@ -179,17 +187,28 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun SigningInfoItem(value: AppSigningValue) {
-        Column(
+
+        SelectionContainer { Column(
             Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(all = 16.dp)
         ) {
-            Text(
-                text = value.packageName,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleLarge,
-            )
+            Row() {
+                Text(
+                    text = value.packageName,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                /*
+                IconButton(
+                    onClick = {
+
+                    }
+                ) {
+                    Icon(Icons.Outlined.CopyAll, contentDescription = "Copy")
+                }*/
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "MD5:",
@@ -221,16 +240,28 @@ class MainActivity : ComponentActivity() {
                 color = Color.Gray,
             )
 
-        }
+        }}
+    }
+
+    private fun onClickPaste() {
+        val text = getClipboardText()?.toString() ?: ""
+        if (text.isEmpty()) return
+        mPnFocuser.requestFocus()
+        mPnContent =
+            mPnContent.copy(text = text, selection = TextRange(text.length))
     }
 
     private fun onClickGetSignature(pn: String?) {
         if (pn == null || pn.trim().isEmpty())
             return
-        mSigningValues.add(
-            0,
-            getAppSignature(pn) ?: return
-        )
+        try {
+            mSigningValues.add(
+                0,
+                getAppSignature(pn) ?: return
+            )
+        } catch (_: Exception) {
+            mPnError.value = true
+        }
     }
 
     private fun getAppSignature(pn: String): AppSigningValue? {

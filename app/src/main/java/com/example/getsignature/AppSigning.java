@@ -110,7 +110,7 @@ public class AppSigning {
             packageInfo = context.getPackageManager().getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
             return packageInfo.signatures;
         } catch (Exception e) {
-            Log.e(TAG, e.toString());
+            Log.w(TAG, e.toString());
             throw e;
         }
     }
@@ -136,7 +136,7 @@ public class AppSigning {
                 fingerprint = sb.toString();
             }
         } catch (Exception e) {
-            Log.e(TAG, e.toString());
+            Log.w(TAG, e.toString());
         }
 
         return fingerprint;
@@ -164,7 +164,7 @@ public class AppSigning {
                 fingerprint = sb.substring(0, sb.length() - 1).toString();
             }
         } catch (Exception e) {
-            Log.e(TAG, e.toString());
+            Log.w(TAG, e.toString());
         }
 
         return fingerprint;
