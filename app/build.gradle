@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace "com.example.getsignature"
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.example.getsignature"
         minSdk 21
-        targetSdk 34
+        targetSdk 35
         versionCode 3
         versionName "1.2"
 
@@ -38,14 +38,14 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.core:core-ktx:1.15.0'
 //    implementation 'androidx.appcompat:appcompat:1.7.0'
 //    implementation 'com.google.android.material:material:1.12.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
-    def composeBom = platform('androidx.compose:compose-bom:2024.10.00')
+    def composeBom = platform('androidx.compose:compose-bom:2025.02.00')
     implementation composeBom
     androidTestImplementation composeBom
 
@@ -78,9 +78,9 @@ dependencies {
     implementation 'androidx.compose.material3.adaptive:adaptive'
 
     // Optional - Integration with activities
-    implementation 'androidx.activity:activity-compose:1.9.3'
+    implementation 'androidx.activity:activity-compose:1.10.1'
     // Optional - Integration with ViewModels
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7'
     // Optional - Integration with LiveData
     implementation 'androidx.compose.runtime:runtime-livedata'
     // Optional - Integration with RxJava
