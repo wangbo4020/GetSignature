@@ -4,6 +4,9 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
+import android.view.InputDevice
+import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -52,6 +55,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        val TAG = MainActivity::class.java.simpleName
+    }
+
     data class AppSigningValue(
         val packageName: String,
         val md5: String,
@@ -88,7 +95,7 @@ class MainActivity : ComponentActivity() {
                 TopAppBar(
                     title = {
                         Text(
-                            text = "GetSignature"
+                            text = getString(R.string.app_name),
                         )
                     },
                     colors = TopAppBarColors(
